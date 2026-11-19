@@ -52,6 +52,26 @@ try {
   const rpc = await p.evaluate(async () => { try { await api('rpc/guardar_suscripcion', { method: 'POST', body: { p_endpoint: 'https://example.invalid/prueba', p_p256dh: 'x', p_auth: 'y', p_dispositivo: 'prueba-borrar' } }); return 'ok'; } catch (e) { return e.message; } });
   ok('registrar dispositivo para avisos', rpc === 'ok', rpc === 'ok' ? '' : rpc.slice(0, 160));
   if (SEC) await fetch(`${URL_}/rest/v1/push_subs?dispositivo=eq.prueba-borrar`, { method: 'DELETE', headers: { apikey: SEC, Authorization: `Bearer ${SEC}` } });
-} catch (e) { ok('prueba', false, e.message.split('\n')[0]); }
+} catch (e) {
+  ok('prueba', false, e.message.split('\n')[0]);
+  const est = await p.evaluate(() => ({ hash: location.hash, dialogo: document.querySelector('dialog[open]')?.id || null, ocupado: !document.querySelector('#ocupado').hidden, ocupadoTxt: document.querySelector('#ocupadoTxt').textContent, titulo: document.querySelector('#titulo').textContent, fab: document.querySelector('#btnNuevo').textContent })).catch(x => x.message);
+  console.log('estado al fallar:', JSON.stringify(est));
+  console.log(e.message.split('\n').slice(0, 12).join('\n'));
+} finally {
+  // Limpieza: borra cualquier patente de prueba que haya quedado (y sus archivos)
+  const PUB = cfg.match(/SUPABASE_ANON_KEY:\s*'([^']+)'/)[1];
+  const H = { apikey: PUB, Authorization: `Bearer ${PUB}`, 'Content-Type': 'application/json' };
+  const r = await fetch(`${URL_}/rest/v1/patentes?patente=like.ZZPRUEBA*&select=id,patente`, { headers: H });
+  const quedaron = (r.ok ? await r.json() : []).filter(x => /^ZZPRUEBA\d+$/.test(x.patente)); // doble control: solo las de prueba
+  for (const { id } of quedaron) {
+    const a = await fetch(`${URL_}/rest/v1/archivos?patente_id=eq.${id}&select=ruta`, { headers: H });
+    const rutas = a.ok ? (await a.json()).map(x => x.ruta) : [];
+    if (rutas.length) await fetch(`${URL_}/storage/v1/object/archivos`, { method: 'DELETE', headers: H, body: JSON.stringify({ prefixes: rutas }) });
+    await fetch(`${URL_}/rest/v1/patentes?id=eq.${id}`, { method: 'DELETE', headers: H });
+  }
+  const r2 = await fetch(`${URL_}/rest/v1/patentes?select=patente`, { headers: H });
+  const todas = r2.ok ? (await r2.json()).map(x => x.patente) : [];
+  console.log(`limpieza: ${quedaron.length} patente(s) de prueba borradas; quedan ${todas.filter(x => x.startsWith('ZZPRUEBA')).length} de prueba y ${todas.filter(x => !x.startsWith('ZZPRUEBA')).length} reales`);
+}
 console.log('\n' + res.join('\n')); if (errs.length) console.log('errores de la página:', errs.slice(0, 5));
 await b.close();
