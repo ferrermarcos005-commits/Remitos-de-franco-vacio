@@ -40,11 +40,11 @@ try {
   ok('subir 2 archivos', nf === 2, `${nf} miniatura(s)`);
   const imgOk = await p.$eval('#listaRemitos .file img', i => new Promise(r => i.complete ? r(i.naturalWidth) : (i.onload = () => r(i.naturalWidth), i.onerror = () => r(0)))).catch(() => 0);
   ok('ver la foto (enlace público)', imgOk > 0, `ancho ${imgOk}`);
-  const [dl] = await Promise.all([p.waitForEvent('download', { timeout: 30000 }), p.click('text=⬇ Descargar todo')]);
+  const [dl] = await Promise.all([p.waitForEvent('download', { timeout: 30000 }), p.click('#btnDescargar')]);
   const z = await JSZip.loadAsync(fs.readFileSync(await dl.path()));
   const names = Object.keys(z.files); ok('descargar ZIP de la patente', names.length === 5, names.join(', '));
   const rutas = await p.evaluate(() => { const id = location.hash.split('/').pop(); return archivos.filter(a => a.patente_id === id).map(a => a.ruta); });
-  await p.click('#cabPatente >> text=Borrar'); await p.waitForSelector('#ocupado', { state: 'hidden', timeout: 30000 }); await p.waitForTimeout(1000);
+  await p.click('#btnBorrarPat'); await p.waitForSelector('#ocupado', { state: 'hidden', timeout: 30000 }); await p.waitForTimeout(1000);
   const sigue = await p.evaluate(pat => datos.some(d => d.patente === pat), PAT);
   ok('borrar patente de prueba', !sigue);
   let quedan = 0; for (const r of rutas) { const x = await fetch(`${URL_}/storage/v1/object/public/archivos/${r}`); if (x.ok) quedan++; }
