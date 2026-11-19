@@ -2,105 +2,243 @@
 <html lang="es">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Remitos Franco</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Remitos · Rutas del Oeste</title>
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="icon.svg">
-<meta name="theme-color" content="#1f6feb">
+<meta name="theme-color" content="#0b4fd6">
 <script src="config.js"></script>
 <script src="jszip.min.js" defer></script>
 <style>
-  :root{--bg:#f4f6f9;--card:#fff;--txt:#1b1f24;--sub:#5b6470;--pri:#1f6feb;--warn:#d1242f;--ok:#1a7f37;--line:#d8dee4;--soft:#eef2f6}
-  @media (prefers-color-scheme:dark){:root{--bg:#0d1117;--card:#161b22;--txt:#e6edf3;--sub:#9198a1;--line:#30363d;--soft:#21262d}}
+  :root{
+    --bg:#eef2f8;--card:#fff;--txt:#111827;--sub:#5b6577;--line:#dfe5ee;--soft:#f3f6fb;
+    --pri:#0b4fd6;--pri2:#2563eb;--pri-soft:#e6eeff;
+    --warn:#ea580c;--warn-soft:#fff1e7;--bad:#dc2626;--bad-soft:#fdecec;--ok:#16a34a;--ok-soft:#e8f7ee;
+    --sombra:0 1px 2px #0f172a14,0 4px 14px #0f172a0f;--radio:16px;
+  }
+  @media (prefers-color-scheme:dark){:root{
+    --bg:#0b1020;--card:#151b2e;--txt:#eef2ff;--sub:#9aa5bd;--line:#273049;--soft:#1b2238;
+    --pri:#3b82f6;--pri2:#60a5fa;--pri-soft:#1c2a4d;--warn:#fb923c;--warn-soft:#3a2416;--bad:#f87171;--bad-soft:#3b1a1d;--ok:#4ade80;--ok-soft:#163323;
+    --sombra:0 1px 2px #0006,0 4px 14px #0004}}
   [hidden]{display:none!important}
-  *{box-sizing:border-box} body{margin:0;font:16px system-ui,sans-serif;background:var(--bg);color:var(--txt)}
-  header{background:var(--pri);color:#fff;padding:12px 16px;position:sticky;top:0;z-index:2;display:flex;align-items:center;gap:10px}
-  header h1{margin:0;font-size:20px} header p{margin:2px 0 0;font-size:14px;opacity:.9}
-  #btnVolver{background:transparent;font-size:26px;padding:0 6px;line-height:1}
-  main{padding:12px 16px 96px;max-width:680px;margin:auto}
-  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:10px}
-  .pend{border-left:6px solid var(--warn)} .done{border-left:6px solid var(--ok)}
-  .clic{cursor:pointer}
-  .row{display:flex;justify-content:space-between;align-items:center;gap:8px}
-  .pat{font-size:20px;font-weight:700;letter-spacing:1px} .tag{font-size:12px;padding:2px 8px;border-radius:99px;background:var(--line)}
-  .big{font-size:18px;font-weight:600;margin-top:2px} .sub{color:var(--sub);font-size:14px}
-  .barra{height:8px;background:var(--soft);border-radius:99px;overflow:hidden;margin:8px 0 4px} .barra i{display:block;height:100%;background:var(--ok)}
-  .pend .barra i{background:var(--warn)}
-  button{font:inherit;border:0;border-radius:10px;padding:10px 14px;background:var(--pri);color:#fff;cursor:pointer}
-  button:disabled{opacity:.5}
-  button.sec{background:var(--line);color:var(--txt)} button.ok{background:var(--ok)} button.mini{padding:6px 10px;font-size:14px}
-  .acts{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
-  input,select,textarea{font:inherit;width:100%;padding:10px;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--txt);margin:4px 0 10px}
-  label{font-size:14px;color:var(--sub)} h2{font-size:16px;margin:18px 0 8px}
-  .fab{position:fixed;right:16px;bottom:16px;font-size:18px;padding:14px 20px;border-radius:99px;box-shadow:0 4px 12px #0004}
-  dialog{border:0;border-radius:14px;padding:16px;width:min(94vw,520px);max-height:92vh;background:var(--card);color:var(--txt)}
-  dialog h2{margin-top:0}
-  .banner{background:#fff3cd;color:#664d03;padding:10px;border-radius:10px;margin-bottom:10px;font-size:14px}
-  .rem{border-top:1px solid var(--line);padding:10px 0} .rem:first-child{border-top:0;padding-top:0}
-  .rem b{font-size:17px}
-  .files{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
-  .file{position:relative;width:84px;text-align:center;font-size:11px;color:var(--sub);word-break:break-all}
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;background:var(--bg);color:var(--txt);font:16px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+  svg.i{width:22px;height:22px;flex:none;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;vertical-align:middle}
+  button{font:inherit;border:0;cursor:pointer;color:inherit;background:none}
+  button:disabled{opacity:.45;cursor:default}
+
+  /* Encabezado */
+  header{position:sticky;top:0;z-index:5;color:#fff;background:linear-gradient(135deg,#0a3fb0,#0b4fd6 55%,#2f6cf0);padding:calc(10px + env(safe-area-inset-top)) 16px 14px;box-shadow:0 2px 10px #0b4fd640}
+  .hrow{display:flex;align-items:center;gap:10px;max-width:720px;margin:auto}
+  .logo{width:40px;height:40px;border-radius:12px;background:#ffffff26;display:grid;place-items:center}
+  .logo svg{width:24px;height:24px}
+  header h1{margin:0;font-size:19px;font-weight:800;letter-spacing:.2px}
+  header p{margin:1px 0 0;font-size:13.5px;opacity:.9}
+  #btnVolver{width:40px;height:40px;border-radius:12px;background:#ffffff26;display:grid;place-items:center;color:#fff}
+  .hbtn{margin-left:auto;width:40px;height:40px;border-radius:12px;background:#ffffff26;display:grid;place-items:center;color:#fff}
+
+  main{padding:14px 16px 120px;max-width:720px;margin:auto}
+  h2{font-size:15px;text-transform:uppercase;letter-spacing:.6px;color:var(--sub);margin:20px 4px 10px}
+
+  /* Resumen */
+  .stats{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .stat{border-radius:var(--radio);padding:14px;box-shadow:var(--sombra);background:var(--card);border:1px solid var(--line);text-align:left;cursor:pointer}
+  .stat b{display:block;font-size:30px;line-height:1.1;font-weight:800}
+  .stat span{font-size:13.5px;color:var(--sub)}
+  .stat.pend b{color:var(--warn)} .stat.done b{color:var(--ok)}
+  .stat.activo{outline:2.5px solid var(--pri)}
+
+  /* Buscador y filtros */
+  .buscar{display:flex;align-items:center;gap:8px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:0 12px;margin:14px 0 10px;box-shadow:var(--sombra)}
+  .buscar input{border:0;outline:0;background:transparent;color:var(--txt);font:inherit;padding:13px 0;width:100%;text-transform:uppercase}
+  .buscar input::placeholder{text-transform:none;color:var(--sub)}
+  .chips{display:flex;gap:8px;overflow-x:auto;padding-bottom:2px}
+  .chip{padding:8px 14px;border-radius:99px;background:var(--card);border:1px solid var(--line);font-size:14.5px;font-weight:600;white-space:nowrap}
+  .chip.on{background:var(--pri);border-color:var(--pri);color:#fff}
+
+  /* Tarjetas */
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radio);padding:14px;margin-bottom:12px;box-shadow:var(--sombra)}
+  .pcard{cursor:pointer;position:relative;overflow:hidden;transition:transform .08s}
+  .pcard:active{transform:scale(.985)}
+  .pcard::before{content:"";position:absolute;inset:0 auto 0 0;width:6px;background:var(--warn)}
+  .pcard.done::before{background:var(--ok)} .pcard.tarde::before{background:var(--bad)}
+  .top{display:flex;align-items:center;justify-content:space-between;gap:10px}
+  .pill{display:inline-flex;align-items:center;gap:5px;font-size:13px;font-weight:700;padding:5px 10px;border-radius:99px;background:var(--warn-soft);color:var(--warn);white-space:nowrap}
+  .pill.ok{background:var(--ok-soft);color:var(--ok)} .pill.bad{background:var(--bad-soft);color:var(--bad)}
+  .pill svg.i{width:15px;height:15px;stroke-width:2.6}
+  .cuenta{display:flex;align-items:baseline;gap:6px;margin:12px 0 6px}
+  .cuenta b{font-size:28px;font-weight:800;line-height:1} .cuenta span{color:var(--sub);font-size:15px}
+  .barra{height:10px;background:var(--soft);border-radius:99px;overflow:hidden}
+  .barra i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,#fb923c,var(--warn))}
+  .done .barra i,.barra.ok i{background:linear-gradient(90deg,#4ade80,var(--ok))} .tarde .barra i{background:linear-gradient(90deg,#f87171,var(--bad))}
+  .meta{display:flex;flex-wrap:wrap;gap:6px 14px;margin-top:10px;color:var(--sub);font-size:13.5px}
+  .meta span{display:inline-flex;align-items:center;gap:5px} .meta svg.i{width:16px;height:16px}
+  .nota{margin-top:10px;padding:8px 10px;border-radius:10px;background:var(--soft);font-size:14px}
+
+  /* Placa estilo patente */
+  .placa{display:inline-flex;flex-direction:column;border:2px solid #1f2937;border-radius:8px;overflow:hidden;background:#fff;color:#111;min-width:118px;box-shadow:0 1px 0 #0002}
+  .placa i{display:block;background:#1d4ed8;color:#fff;font:700 8px/1 system-ui,sans-serif;letter-spacing:1.6px;text-align:center;padding:3px 6px;font-style:normal}
+  .placa b{font:800 21px/1 ui-monospace,"Roboto Mono",Menlo,Consolas,monospace;letter-spacing:1.5px;padding:5px 10px 6px;text-align:center}
+  .placa.grande{min-width:170px} .placa.grande b{font-size:30px;padding:7px 14px 9px} .placa.grande i{font-size:10px}
+  .tipo{display:inline-flex;align-items:center;gap:6px;font-size:13.5px;color:var(--sub);font-weight:600}
+
+  /* Detalle */
+  .det{display:flex;flex-direction:column;gap:12px}
+  .det .top{align-items:flex-start}
+  .acciones{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:13px 14px;border-radius:14px;font-weight:700;font-size:16px;background:var(--soft);color:var(--txt);border:1px solid var(--line)}
+  .btn.pri{background:var(--pri);color:#fff;border-color:var(--pri)} .btn.ok{background:var(--ok);color:#fff;border-color:var(--ok)}
+  .btn.peligro{color:var(--bad)} .btn.full{grid-column:1/-1;width:100%} .btn.chico{padding:9px 12px;font-size:14.5px;border-radius:12px}
+  .rem{padding:14px;border:1px solid var(--line);border-radius:14px;margin-bottom:10px;background:var(--card);box-shadow:var(--sombra)}
+  .rem .num{font-size:18px;font-weight:800}
+  .rem .hora{font-size:13px;color:var(--sub)}
+  .campo{margin-top:6px;font-size:15px} .campo small{display:block;font-size:12px;color:var(--sub);text-transform:uppercase;letter-spacing:.5px}
+  .sinarch{margin-top:8px;font-size:13.5px;color:var(--warn);display:flex;align-items:center;gap:6px}
+  .sinarch svg.i{width:16px;height:16px}
+  .files{display:flex;flex-wrap:wrap;gap:10px;margin-top:10px}
+  .file{position:relative;width:86px;text-align:center;font-size:11.5px;color:var(--sub);word-break:break-word}
   .file a{display:block;color:inherit;text-decoration:none}
-  .file img,.file .ico{width:84px;height:84px;object-fit:cover;border-radius:8px;border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:30px;background:var(--soft)}
-  .file .x{position:absolute;top:-6px;right:-6px;width:26px;height:26px;padding:0;border-radius:99px;background:var(--warn);font-size:14px;line-height:26px}
-  .nuevos{font-size:14px;margin:6px 0} .nuevos div{display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px dashed var(--line)}
-  #ocupado{position:fixed;inset:0;background:#0007;display:flex;align-items:center;justify-content:center;z-index:9}
-  #ocupado div{background:var(--card);color:var(--txt);padding:18px 22px;border-radius:12px;max-width:80vw;text-align:center}
+  .file img,.file .ico{width:86px;height:86px;object-fit:cover;border-radius:12px;border:1px solid var(--line);display:grid;place-items:center;background:var(--soft);margin-bottom:3px}
+  .file .ico svg.i{width:32px;height:32px;color:var(--pri)}
+  .file .x{position:absolute;top:-7px;right:-7px;width:28px;height:28px;border-radius:99px;background:var(--bad);color:#fff;display:grid;place-items:center;box-shadow:var(--sombra)}
+  .file .x svg.i{width:16px;height:16px;stroke-width:3}
+  .vacio{text-align:center;padding:28px 16px;color:var(--sub)}
+  .vacio .grande{width:64px;height:64px;border-radius:20px;background:var(--pri-soft);color:var(--pri);display:grid;place-items:center;margin:0 auto 10px}
+  .vacio .grande svg.i{width:34px;height:34px}
+  .vacio b{display:block;color:var(--txt);font-size:17px;margin-bottom:4px}
+
+  /* Dispositivo */
+  .disp .fila{display:flex;align-items:center;gap:12px;padding:10px 0;border-top:1px solid var(--line)}
+  .disp .fila:first-child,.disp .fila[hidden]+.fila{border-top:0;padding-top:0}
+  .disp .fila .txt{flex:1;font-size:14.5px} .disp .fila .txt small{display:block;color:var(--sub);font-size:13px}
+  .disp .ic{width:38px;height:38px;border-radius:12px;display:grid;place-items:center;background:var(--pri-soft);color:var(--pri);flex:none}
+  .banner{display:flex;gap:10px;align-items:center;background:var(--warn-soft);color:var(--warn);border-radius:14px;padding:12px;margin-bottom:12px;font-size:14.5px;font-weight:600}
+  .banner.info{background:var(--pri-soft);color:var(--pri)}
+  .banner .btn{margin-left:auto;padding:8px 12px;font-size:14px}
+
+  /* Botón flotante */
+  .fab{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(18px + env(safe-area-inset-bottom));z-index:6;display:flex;white-space:nowrap;align-items:center;gap:8px;padding:15px 26px;border-radius:99px;background:var(--pri);color:#fff;font-size:17px;font-weight:800;box-shadow:0 6px 20px #0b4fd666}
+  .fab svg.i{width:24px;height:24px;stroke-width:2.6}
+
+  /* Formularios (hoja que sube desde abajo) */
+  dialog{border:0;padding:0;background:var(--card);color:var(--txt);width:100%;max-width:560px;max-height:94vh;margin:auto auto 0;border-radius:22px 22px 0 0;box-shadow:0 -8px 30px #0004}
+  dialog::backdrop{background:#0b1020a6}
+  @media (min-width:700px){dialog{margin:auto;border-radius:22px}}
+  dialog form{padding:8px 18px calc(18px + env(safe-area-inset-bottom))}
+  .asa{width:44px;height:5px;border-radius:9px;background:var(--line);margin:4px auto 10px}
+  dialog h3{margin:0 0 14px;font-size:20px}
+  label.lbl{display:block;font-size:13.5px;font-weight:700;color:var(--sub);margin:12px 0 6px}
+  input.in,textarea.in{font:inherit;font-size:17px;width:100%;padding:13px 14px;border-radius:12px;border:1.5px solid var(--line);background:var(--soft);color:var(--txt);outline:0}
+  input.in:focus,textarea.in:focus{border-color:var(--pri);background:var(--card)}
+  .seg{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .seg label{display:flex;align-items:center;justify-content:center;gap:8px;padding:13px;border-radius:12px;border:1.5px solid var(--line);background:var(--soft);font-weight:700;cursor:pointer}
+  .seg input{display:none} .seg input:checked+label{border-color:var(--pri);background:var(--pri-soft);color:var(--pri)}
+  .stepper{display:grid;grid-template-columns:56px 1fr 56px;gap:8px}
+  .stepper button{border-radius:12px;background:var(--soft);border:1.5px solid var(--line);font-size:26px;font-weight:700}
+  .stepper input{text-align:center;font-size:22px;font-weight:800;-moz-appearance:textfield;appearance:textfield}
+  .stepper input::-webkit-outer-spin-button,.stepper input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+  .adj{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+  .adj .btn{flex-direction:column;gap:4px;padding:14px 8px;font-size:14.5px}
+  .adj .btn svg.i{width:28px;height:28px;color:var(--pri)}
+  .nuevos{margin-top:8px} .nuevos div{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:10px;background:var(--ok-soft);color:var(--ok);font-size:14px;margin-top:6px;font-weight:600}
+  .nuevos span{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .pie{display:grid;gap:8px;margin-top:18px}
+
+  #ocupado{position:fixed;inset:0;background:#0b1020a6;display:grid;place-items:center;z-index:20}
+  #ocupado div{background:var(--card);color:var(--txt);padding:22px 26px;border-radius:18px;max-width:80vw;text-align:center;font-weight:700;box-shadow:var(--sombra)}
+  .spin{width:34px;height:34px;border-radius:99px;border:4px solid var(--pri-soft);border-top-color:var(--pri);margin:0 auto 12px;animation:g 0.8s linear infinite}
+  @keyframes g{to{transform:rotate(360deg)}}
+  #toast{position:fixed;left:50%;bottom:calc(92px + env(safe-area-inset-bottom));transform:translateX(-50%);background:#111827;color:#fff;padding:12px 18px;border-radius:12px;font-weight:600;z-index:30;box-shadow:var(--sombra);max-width:90vw;text-align:center}
 </style>
 </head>
 <body>
 <header>
-  <button id="btnVolver" hidden aria-label="Volver">←</button>
-  <div><h1 id="titulo">Remitos por patente</h1><p id="resumen"></p></div>
+  <div class="hrow">
+    <button id="btnVolver" hidden aria-label="Volver"></button>
+    <div class="logo" id="logo"></div>
+    <div><h1 id="titulo">Remitos</h1><p id="resumen">Rutas del Oeste</p></div>
+    <button class="hbtn" id="btnRecargar" aria-label="Actualizar"></button>
+  </div>
 </header>
 
 <main>
   <div id="error" class="banner" hidden></div>
 
   <section id="vistaLista">
-    <div id="avisoNotif" class="banner" hidden>Activá las notificaciones para que te recuerde los pendientes. <button id="btnNotif" class="mini">Activar</button></div>
-    <h2>Pendientes</h2><div id="listaPend"></div>
-    <h2>Completas</h2><div id="listaDone"></div>
-    <h2>Avisos</h2>
-    <div class="card"><div class="sub" id="estadoAvisos"></div>
-      <div class="acts"><button class="sec" id="btnProbar">Probar notificación</button><button class="sec" id="btnRecargar">Actualizar</button></div></div>
+    <div id="avisoNotif" class="banner info" hidden><span id="icoCampana"></span><span>Activá los avisos para que la app te recuerde los pendientes.</span><button class="btn pri" id="btnNotif">Activar</button></div>
+    <div class="stats">
+      <button class="stat pend" data-filtro="pend"><b id="nPend">0</b><span id="nPendSub">patentes pendientes</span></button>
+      <button class="stat done" data-filtro="done"><b id="nDone">0</b><span>patentes completas</span></button>
+    </div>
+    <div class="buscar"><span id="icoBuscar"></span><input id="buscar" placeholder="Buscar patente…" autocomplete="off" inputmode="search"></div>
+    <div class="chips">
+      <button class="chip on" data-filtro="pend">Pendientes</button>
+      <button class="chip" data-filtro="done">Completas</button>
+      <button class="chip" data-filtro="todas">Todas</button>
+    </div>
+    <h2 id="tituloLista">Pendientes</h2>
+    <div id="lista"></div>
+
+    <h2>Este dispositivo</h2>
+    <div class="card disp">
+      <div class="fila" id="filaInstalar" hidden><span class="ic" id="icoCel"></span><div class="txt">Instalar la app<small>Queda como un ícono en la pantalla de inicio.</small></div><button class="btn pri chico" id="btnInstalar">Instalar</button></div>
+      <div class="fila"><span class="ic" id="icoCampana2"></span><div class="txt" id="estadoAvisos"></div><button class="btn chico" id="btnProbar">Probar</button></div>
+    </div>
   </section>
 
   <section id="vistaPatente" hidden>
-    <div class="card" id="cabPatente"></div>
-    <h2>Remitos</h2>
-    <div class="card" id="listaRemitos"></div>
+    <div class="card det" id="cabPatente"></div>
+    <h2 id="tituloRemitos">Remitos</h2>
+    <div id="listaRemitos"></div>
   </section>
 </main>
-<button class="fab" id="btnNuevo">+ Patente</button>
 
-<dialog id="dlg"><form id="frm">
-  <h2 id="dlgTit">Nueva patente</h2>
-  <label>Patente</label><input name="patente" required placeholder="AB123CD" style="text-transform:uppercase" autocomplete="off">
-  <label>Tipo</label><select name="tipo"><option>Camión/Semi</option><option>Balancín</option></select>
-  <label>Remitos que tendrían que venir</label><input name="esperados" type="number" min="0" required inputmode="numeric">
-  <label>Nota (ej: faltan clientes, termina mañana)</label><textarea name="nota" rows="2"></textarea>
-  <div class="acts"><button type="submit">Guardar</button><button class="sec" type="button" data-cerrar>Cancelar</button></div>
+<button class="fab" id="btnNuevo"></button>
+
+<dialog id="dlg"><form id="frm" autocomplete="off">
+  <div class="asa"></div>
+  <h3 id="dlgTit">Nueva patente</h3>
+  <label class="lbl" for="fPatente">Patente</label>
+  <input class="in" id="fPatente" name="patente" required placeholder="AB123CD" style="text-transform:uppercase;font-weight:800;letter-spacing:1px">
+  <label class="lbl">Tipo</label>
+  <div class="seg">
+    <input type="radio" name="tipo" id="tCamion" value="Camión/Semi" checked><label for="tCamion">Camión/Semi</label>
+    <input type="radio" name="tipo" id="tBalancin" value="Balancín"><label for="tBalancin">Balancín</label>
+  </div>
+  <label class="lbl" for="fEsperados">¿Cuántos remitos tendrían que venir?</label>
+  <div class="stepper"><button type="button" data-paso="-1" aria-label="Uno menos">−</button><input class="in" id="fEsperados" name="esperados" type="number" min="0" required inputmode="numeric"><button type="button" data-paso="1" aria-label="Uno más">+</button></div>
+  <label class="lbl" for="fNota">Nota (opcional)</label>
+  <textarea class="in" id="fNota" name="nota" rows="2" placeholder="Ej: faltan clientes, termina mañana"></textarea>
+  <div class="pie"><button class="btn pri" type="submit">Guardar patente</button><button class="btn" type="button" data-cerrar>Cancelar</button></div>
 </form></dialog>
 
-<dialog id="dlgR"><form id="frmR">
-  <h2 id="rTit">Remito</h2>
-  <label>Número de remito</label><input name="numero" required autocomplete="off">
-  <label>Instrucción</label><textarea name="instruccion" rows="2"></textarea>
-  <label>Mercadería llevada</label><textarea name="mercaderia" rows="2"></textarea>
-  <label>Fotos y archivos</label>
+<dialog id="dlgR"><form id="frmR" autocomplete="off">
+  <div class="asa"></div>
+  <h3 id="rTit">Remito</h3>
+  <label class="lbl" for="rNumero">Número de remito</label>
+  <input class="in" id="rNumero" name="numero" required placeholder="Ej: 0001-00012345" style="font-weight:800">
+  <label class="lbl" for="rInstruccion">Instrucción</label>
+  <textarea class="in" id="rInstruccion" name="instruccion" rows="2" placeholder="Opcional"></textarea>
+  <label class="lbl" for="rMercaderia">Mercadería llevada</label>
+  <textarea class="in" id="rMercaderia" name="mercaderia" rows="2" placeholder="Opcional"></textarea>
+  <label class="lbl">Fotos y archivos</label>
   <div class="files" id="rExistentes"></div>
   <div class="nuevos" id="rNuevos"></div>
-  <div class="acts">
-    <button type="button" class="sec" id="btnFoto">📷 Sacar foto</button>
-    <button type="button" class="sec" id="btnArchivo">📎 Adjuntar archivo</button>
+  <div class="adj">
+    <button type="button" class="btn" id="btnFoto"></button>
+    <button type="button" class="btn" id="btnArchivo"></button>
   </div>
   <input type="file" id="inFoto" accept="image/*" capture="environment" hidden>
   <input type="file" id="inArchivo" multiple hidden>
-  <div class="acts"><button type="submit" id="btnGuardarR">Guardar remito</button><button class="sec" type="button" data-cerrar>Cancelar</button></div>
+  <div class="pie">
+    <button type="submit" class="btn pri" id="btnGuardarR">Guardar remito</button>
+    <button type="submit" class="btn" id="btnGuardarOtro" value="otro">Guardar y cargar otro</button>
+    <button class="btn" type="button" data-cerrar>Cancelar</button>
+  </div>
 </form></dialog>
 
-<div id="ocupado" hidden><div id="ocupadoTxt">Un momento…</div></div>
+<div id="ocupado" hidden><div><div class="spin"></div><span id="ocupadoTxt">Un momento…</span></div></div>
+<div id="toast" hidden></div>
 
 <script>
 const C=window.CONFIG||{};
@@ -108,11 +246,40 @@ const BUCKET='archivos';
 const $=s=>document.querySelector(s);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const fecha=t=>new Date(t).toLocaleString('es-AR',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});
-const dias=t=>{const n=Math.floor((Date.now()-new Date(t))/864e5);return n<=0?'hoy':n===1?'ayer':`hace ${n} días`};
+const hora=t=>{const d=new Date(t),hoy=new Date();const h=d.toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'});
+  if(d.toDateString()===hoy.toDateString())return 'Hoy '+h;const ay=new Date(hoy-864e5);if(d.toDateString()===ay.toDateString())return 'Ayer '+h;
+  return d.toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit'})+' '+h};
+const diasDesde=t=>Math.floor((Date.now()-new Date(t))/864e5);
+const hace=t=>{const n=diasDesde(t);return n<=0?'hoy':n===1?'ayer':`hace ${n} días`};
 const hechos=d=>d.remitos.length, faltan=d=>Math.max(0,d.esperados-hechos(d));
+const tarde=d=>faltan(d)>0&&diasDesde(d.creado)>=1;
 const uid=()=>crypto.randomUUID?crypto.randomUUID():Date.now().toString(36)+Math.random().toString(36).slice(2);
 const kb=n=>n>1048576?(n/1048576).toFixed(1)+' MB':Math.max(1,Math.round(n/1024))+' KB';
-let datos=[], archivos=[], hayTablaArchivos=true, reg=null, estadoPush='';
+let datos=[], archivos=[], hayTablaArchivos=true, reg=null, estadoPush='', filtro='pend', busqueda='';
+
+// ---------- Íconos ----------
+const P={
+  camion:'<path d="M1 3h15v13H1z"/><path d="M16 8h4l3 3v5h-7z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/>',
+  mas:'<path d="M12 5v14M5 12h14"/>', check:'<path d="M20 6 9 17l-5-5"/>', atras:'<path d="m15 18-6-6 6-6"/>',
+  bajar:'<path d="M12 3v12M7 10l5 5 5-5M5 21h14"/>', foto:'<path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/>',
+  clip:'<path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/>',
+  campana:'<path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/>',
+  basura:'<path d="M3 6h18M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6M10 11v6M14 11v6M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>',
+  lapiz:'<path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z"/>', buscar:'<circle cx="11" cy="11" r="7"/><path d="m21 21-4.35-4.35"/>',
+  archivo:'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/>', reloj:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+  cel:'<rect x="6" y="2" width="12" height="20" rx="2"/><path d="M11 18h2"/>', recargar:'<path d="M21 4v6h-6"/><path d="M20.49 15A9 9 0 1 1 18.4 5.6L21 10"/>',
+  alerta:'<path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17h.01"/>',
+  x:'<path d="M18 6 6 18M6 6l12 12"/>', caja:'<path d="M21 8 12 3 3 8v8l9 5 9-5z"/><path d="m3 8 9 5 9-5M12 13v8"/>'
+};
+const I=(n,cls='')=>`<svg class="i ${cls}" viewBox="0 0 24 24" aria-hidden="true">${P[n]}</svg>`;
+$('#logo').innerHTML=I('camion');$('#btnVolver').innerHTML=I('atras');$('#btnRecargar').innerHTML=I('recargar');
+$('#icoBuscar').innerHTML=I('buscar');$('#icoCampana').innerHTML=I('campana');$('#icoCampana2').innerHTML=I('campana');$('#icoCel').innerHTML=I('cel');
+$('#btnFoto').innerHTML=I('foto')+'Sacar foto';$('#btnArchivo').innerHTML=I('clip')+'Adjuntar archivo';
+
+// Patente con formato: AB 123 CD (Mercosur) o ABC 123 (anterior)
+function placa(p,grande){const t=String(p||'').toUpperCase().replace(/\s+/g,'');
+  const f=/^[A-Z]{2}\d{3}[A-Z]{2}$/.test(t)?t.replace(/^(..)(...)(..)$/,'$1 $2 $3'):/^[A-Z]{3}\d{3}$/.test(t)?t.replace(/^(...)(...)$/,'$1 $2'):t;
+  return `<span class="placa${grande?' grande':''}"><i>ARGENTINA</i><b>${esc(f)}</b></span>`}
 
 // ---------- Servidor (Supabase) ----------
 function cab(extra={}){return {apikey:C.SUPABASE_ANON_KEY,Authorization:'Bearer '+C.SUPABASE_ANON_KEY,...extra}}
@@ -137,21 +304,25 @@ async function borrarArchivosStorage(rutas){
 async function recargar(){
   try{
     datos=await api('patentes?select=*,remitos(*)&order=creado.asc&remitos.order=creado.asc');
+    const t=x=>Date.parse(x.creado)||0;datos.sort((a,b)=>t(a)-t(b));datos.forEach(d=>d.remitos.sort((a,b)=>t(a)-t(b)));
     try{archivos=await api('archivos?select=*&order=creado.asc');hayTablaArchivos=true}
     catch(e){archivos=[];hayTablaArchivos=false;console.log('archivos',e)}
     $('#error').hidden=hayTablaArchivos;
-    if(!hayTablaArchivos)$('#error').textContent='Falta actualizar la base de datos para poder adjuntar fotos y archivos.';
+    if(!hayTablaArchivos)$('#error').innerHTML=I('alerta')+'<span>Falta actualizar la base de datos para poder adjuntar fotos y archivos.</span>';
   }catch(e){
-    $('#error').hidden=false;$('#error').textContent='No pude conectar con el servidor. Revisá la señal y tocá Actualizar.';console.log(e);
+    $('#error').hidden=false;$('#error').innerHTML=I('alerta')+'<span>No pude conectar con el servidor. Revisá la señal y tocá actualizar.</span>';console.log(e);
   }
   render();
 }
-async function hacer(msg,fn){
-  ocupado(msg);
-  try{await fn()}catch(e){alert('No se pudo completar: '+e.message);console.log(e)}
+async function hacer(msg,fn,listo){
+  ocupado(msg);let bien=true;
+  try{await fn()}catch(e){bien=false;alert('No se pudo completar: '+e.message);console.log(e)}
   ocupado('Actualizando…');await recargar();ocupado(false);
+  if(bien&&listo)toast(listo);
+  return bien;
 }
 function ocupado(msg){$('#ocupado').hidden=!msg;if(msg)$('#ocupadoTxt').textContent=msg}
+let tToast;function toast(msg){const t=$('#toast');t.textContent=msg;t.hidden=false;clearTimeout(tToast);tToast=setTimeout(()=>t.hidden=true,2600)}
 
 // ---------- Pantallas ----------
 const byId=id=>datos.find(x=>x.id===id);
@@ -161,67 +332,96 @@ function patenteActual(){const m=location.hash.match(/^#\/p\/(.+)$/);return m&&b
 
 function render(){
   const p=patenteActual();
-  $('#vistaLista').hidden=!!p;$('#vistaPatente').hidden=!p;$('#btnVolver').hidden=!p;
-  $('#btnNuevo').textContent=p?'+ Remito':'+ Patente';
+  $('#vistaLista').hidden=!!p;$('#vistaPatente').hidden=!p;$('#btnVolver').hidden=!p;$('#logo').hidden=!!p;
+  $('#btnNuevo').innerHTML=I('mas')+(p?'Cargar remito':'Nueva patente');
   p?renderPatente(p):renderLista();
   const pend=datos.filter(d=>faltan(d)>0);
   if(navigator.setAppBadge){pend.length?navigator.setAppBadge(pend.length).catch(()=>{}):navigator.clearAppBadge().catch(()=>{})}
 }
 function barra(d){const pc=d.esperados?Math.min(100,Math.round(hechos(d)/d.esperados*100)):100;return `<div class="barra"><i style="width:${pc}%"></i></div>`}
+function estadoPill(d){
+  if(!faltan(d))return `<span class="pill ok">${I('check')}Completa</span>`;
+  return tarde(d)?`<span class="pill bad">${I('alerta')}Faltan ${faltan(d)}</span>`:`<span class="pill">Faltan ${faltan(d)}</span>`;
+}
+function tipoTxt(d){return `<span class="tipo">${I(d.tipo==='Balancín'?'caja':'camion')}${esc(d.tipo)}</span>`}
 function renderLista(){
-  const pend=datos.filter(d=>faltan(d)>0), done=datos.filter(d=>faltan(d)===0).reverse();
-  $('#titulo').textContent='Remitos por patente';
-  $('#resumen').textContent=pend.length?`${pend.length} patente(s) con remitos pendientes`:'Todo al día 👌';
-  const card=d=>{const nf=archivos.filter(a=>a.patente_id===d.id).length;return `<div class="card clic ${faltan(d)?'pend':'done'}" onclick="location.hash='#/p/${d.id}'">
-    <div class="row"><span class="pat">${esc(d.patente)}</span><span class="tag">${esc(d.tipo)}</span></div>
-    <div class="big">${hechos(d)} de ${d.esperados} remitos ${faltan(d)?`· faltan ${faltan(d)}`:'✔'}</div>${barra(d)}
-    <div class="sub">Cargada ${dias(d.creado)}${nf?` · ${nf} archivo(s)`:''}${d.nota?' · '+esc(d.nota):''}</div></div>`};
-  $('#listaPend').innerHTML=pend.map(card).join('')||'<p class="sub">No hay pendientes.</p>';
-  $('#listaDone').innerHTML=done.map(card).join('')||'<p class="sub">Nada todavía.</p>';
+  const pend=datos.filter(d=>faltan(d)>0), done=datos.filter(d=>faltan(d)===0);
+  const faltanTot=pend.reduce((s,d)=>s+faltan(d),0);
+  $('#titulo').textContent='Remitos';
+  $('#resumen').textContent=pend.length?`Faltan ${faltanTot} remito(s) en ${pend.length} patente(s)`:'Todo al día 👌';
+  $('#nPend').textContent=pend.length;$('#nPendSub').textContent=pend.length?`pendientes · faltan ${faltanTot}`:'patentes pendientes';$('#nDone').textContent=done.length;
+  document.querySelectorAll('[data-filtro]').forEach(b=>b.classList.toggle(b.classList.contains('chip')?'on':'activo',b.dataset.filtro===filtro));
+  $('#tituloLista').textContent={pend:'Pendientes (las más viejas primero)',done:'Completas',todas:'Todas'}[filtro];
+  let lista=filtro==='pend'?pend:filtro==='done'?[...done].reverse():[...pend,...[...done].reverse()];
+  const q=busqueda.replace(/\s+/g,'');if(q)lista=lista.filter(d=>d.patente.replace(/\s+/g,'').includes(q));
+  $('#lista').innerHTML=lista.map(d=>{const nf=archivos.filter(a=>a.patente_id===d.id).length;
+    const ult=d.remitos.length?d.remitos[d.remitos.length-1].creado:null;
+    return `<div class="card pcard ${faltan(d)?(tarde(d)?'tarde':''):'done'}" onclick="location.hash='#/p/${d.id}'">
+      <div class="top">${placa(d.patente)}${estadoPill(d)}</div>
+      <div class="cuenta"><b>${hechos(d)}</b><span>de ${d.esperados} remitos</span></div>${barra(d)}
+      <div class="meta">${tipoTxt(d)}<span>${I('reloj')}Cargada ${hace(d.creado)}</span>${ult?`<span>Último remito: ${hora(ult)}</span>`:''}${nf?`<span>${I('clip')}${nf}</span>`:''}</div>
+      ${d.nota?`<div class="nota">${esc(d.nota)}</div>`:''}</div>`}).join('')
+    ||(q?`<div class="vacio"><b>No encontré "${esc(busqueda)}"</b>Revisá cómo está escrita la patente.</div>`
+      :filtro==='pend'?`<div class="vacio"><div class="grande">${I('check')}</div><b>¡No hay pendientes!</b>${datos.length?'Todas las patentes están completas.':'Tocá "Nueva patente" para empezar.'}</div>`
+      :`<div class="vacio"><div class="grande">${I('camion')}</div><b>Todavía no hay patentes acá</b></div>`);
   const perm='Notification' in window?Notification.permission:'no';
-  $('#avisoNotif').hidden=perm==='granted'||perm==='no';
-  $('#estadoAvisos').innerHTML='Avisos cada 1 hora, de lunes a viernes de 8 a 18, mientras haya pendientes.<br>'+
-    (perm==='granted'?'Notificaciones permitidas en este dispositivo ✔':'Notificaciones sin activar en este dispositivo.')+(estadoPush?'<br>'+esc(estadoPush):'');
+  $('#avisoNotif').hidden=perm!=='default';
+  $('#estadoAvisos').innerHTML=(perm==='granted'?'Avisos activados ✔':perm==='denied'?'Avisos bloqueados':'Avisos sin activar')+
+    `<small>${perm==='denied'?'Se habilitan desde los permisos de notificaciones del navegador o del celular.':'Cada 1 hora, de lunes a viernes de 8 a 18, mientras haya pendientes.'}${estadoPush?' '+esc(estadoPush):''}</small>`;
 }
 function miniatura(a,borrable){
-  const ico=esImagen(a)?`<img src="${urlArchivo(a.ruta)}" alt="" loading="lazy">`:`<span class="ico">${(a.tipo||'').includes('pdf')?'📄':'📎'}</span>`;
-  return `<div class="file"><a href="${urlArchivo(a.ruta)}" target="_blank" rel="noopener">${ico}${esc(a.nombre.length>22?a.nombre.slice(0,20)+'…':a.nombre)}</a>
-    ${borrable?`<button type="button" class="x" title="Quitar" onclick="quitarArchivo('${a.id}')">✕</button>`:''}</div>`;
+  const ico=esImagen(a)?`<img src="${urlArchivo(a.ruta)}" alt="" loading="lazy">`:`<span class="ico">${I('archivo')}</span>`;
+  return `<div class="file"><a href="${urlArchivo(a.ruta)}" target="_blank" rel="noopener">${ico}${esc(a.nombre.length>24?a.nombre.slice(0,22)+'…':a.nombre)}</a>
+    ${borrable?`<button type="button" class="x" title="Quitar" aria-label="Quitar ${esc(a.nombre)}" onclick="quitarArchivo('${a.id}')">${I('x')}</button>`:''}</div>`;
 }
 function renderPatente(d){
-  $('#titulo').textContent=d.patente;
+  $('#titulo').textContent='Patente '+d.patente;
   $('#resumen').textContent=faltan(d)?`Faltan ${faltan(d)} remito(s)`:'Patente completa ✔';
   const nf=archivos.filter(a=>a.patente_id===d.id).length;
-  $('#cabPatente').className='card '+(faltan(d)?'pend':'done');
-  $('#cabPatente').innerHTML=`<div class="row"><span class="pat">${esc(d.patente)}</span><span class="tag">${esc(d.tipo)}</span></div>
-    <div class="big">${hechos(d)} de ${d.esperados} remitos ${faltan(d)?`· faltan ${faltan(d)}`:'✔'}</div>${barra(d)}
-    <div class="sub">Cargada ${fecha(d.creado)} · ${nf} archivo(s)${d.nota?'<br>Nota: '+esc(d.nota):''}</div>
-    <div class="acts"><button class="ok" onclick="descargarPatente('${d.id}')">⬇ Descargar todo</button>
-      <button class="sec" onclick="editarPatente('${d.id}')">Editar</button><button class="sec" onclick="borrarPatente('${d.id}')">Borrar</button></div>`;
-  $('#listaRemitos').innerHTML=d.remitos.map(r=>{const fs=archivosDe(r.id);return `<div class="rem">
-      <div class="row"><b>N° ${esc(r.numero)}</b><span class="sub">${fecha(r.creado)}</span></div>
-      ${r.instruccion?`<div>Instrucción: ${esc(r.instruccion)}</div>`:''}${r.mercaderia?`<div>Mercadería: ${esc(r.mercaderia)}</div>`:''}
-      ${fs.length?`<div class="files">${fs.map(a=>miniatura(a,false)).join('')}</div>`:'<div class="sub">Sin fotos ni archivos.</div>'}
-      <div class="acts"><button class="sec mini" onclick="abrirRemito('${d.id}','${r.id}')">Completar / adjuntar</button><button class="sec mini" onclick="borrarRemito('${r.id}')">Quitar</button></div></div>`}).join('')
-    ||'<p class="sub">Todavía no hay remitos. Tocá "+ Remito" para cargar el primero.</p>';
+  $('#cabPatente').className='card det '+(faltan(d)?(tarde(d)?'tarde':''):'done');
+  $('#cabPatente').innerHTML=`<div class="top">${placa(d.patente,true)}${estadoPill(d)}</div>
+    <div><div class="cuenta"><b>${hechos(d)}</b><span>de ${d.esperados} remitos${faltan(d)?` · faltan ${faltan(d)}`:''}</span></div>${barra(d)}</div>
+    <div class="meta">${tipoTxt(d)}<span>${I('reloj')}Cargada ${fecha(d.creado)}</span><span>${I('clip')}${nf} archivo(s)</span></div>
+    ${d.nota?`<div class="nota">${esc(d.nota)}</div>`:''}
+    <div class="acciones" style="margin-top:2px">
+      <button class="btn ok full" id="btnDescargar" onclick="descargarPatente('${d.id}')">${I('bajar')}Descargar todo (ZIP)</button>
+      <button class="btn" id="btnEditarPat" onclick="editarPatente('${d.id}')">${I('lapiz')}Editar</button>
+      <button class="btn peligro" id="btnBorrarPat" onclick="borrarPatente('${d.id}')">${I('basura')}Borrar</button>
+    </div>`;
+  $('#tituloRemitos').textContent=`Remitos cargados (${hechos(d)})`;
+  $('#listaRemitos').innerHTML=[...d.remitos].reverse().map(r=>{const fs=archivosDe(r.id);return `<div class="rem">
+      <div class="top"><span class="num">N° ${esc(r.numero)}</span><span class="hora">${hora(r.creado)}</span></div>
+      ${r.instruccion?`<div class="campo"><small>Instrucción</small>${esc(r.instruccion)}</div>`:''}
+      ${r.mercaderia?`<div class="campo"><small>Mercadería</small>${esc(r.mercaderia)}</div>`:''}
+      ${fs.length?`<div class="files">${fs.map(a=>miniatura(a,false)).join('')}</div>`:`<div class="sinarch">${I('foto')}Sin fotos ni archivos</div>`}
+      <div class="acciones"><button class="btn chico" onclick="abrirRemito('${d.id}','${r.id}')">${I('lapiz')}Completar / adjuntar</button>
+        <button class="btn chico peligro" onclick="borrarRemito('${r.id}')">${I('basura')}Quitar</button></div></div>`}).join('')
+    ||`<div class="vacio"><div class="grande">${I('archivo')}</div><b>Todavía no hay remitos</b>Tocá "Cargar remito" para cargar el primero.</div>`;
 }
-window.addEventListener('hashchange',render);
+window.addEventListener('hashchange',()=>{render();scrollTo(0,0)});
 $('#btnVolver').onclick=()=>{history.length>1?history.back():location.hash=''};
+document.querySelectorAll('[data-filtro]').forEach(b=>b.onclick=()=>{filtro=b.dataset.filtro;render()});
+$('#buscar').oninput=e=>{busqueda=e.target.value.trim().toUpperCase();if(busqueda&&filtro!=='todas')filtro='todas';render()};
 
 // ---------- Patentes ----------
 let editId=null;
 $('#btnNuevo').onclick=()=>{const p=patenteActual();if(p)return abrirRemito(p.id,null);
-  editId=null;$('#frm').reset();$('#dlgTit').textContent='Nueva patente';$('#dlg').showModal()};
+  editId=null;$('#frm').reset();$('#dlgTit').textContent='Nueva patente';$('#dlg').showModal();$('#fPatente').focus()};
+document.querySelectorAll('[data-paso]').forEach(b=>b.onclick=()=>{const i=$('#fEsperados');i.value=Math.max(0,(+i.value||0)+ +b.dataset.paso)});
 window.editarPatente=id=>{const d=byId(id);editId=id;const f=$('#frm');
-  ['patente','tipo','esperados','nota'].forEach(k=>f[k].value=d[k]??'');$('#dlgTit').textContent='Editar patente';$('#dlg').showModal()};
+  f.patente.value=d.patente;f.esperados.value=d.esperados;f.nota.value=d.nota??'';(d.tipo==='Balancín'?$('#tBalancin'):$('#tCamion')).checked=true;
+  $('#dlgTit').textContent='Editar patente';$('#dlg').showModal()};
 $('#frm').onsubmit=e=>{e.preventDefault();const f=$('#frm');
-  const v={patente:f.patente.value.trim().toUpperCase(),tipo:f.tipo.value,esperados:+f.esperados.value,nota:f.nota.value.trim()};
+  const v={patente:f.patente.value.trim().toUpperCase().replace(/\s+/g,''),tipo:f.tipo.value,esperados:+f.esperados.value,nota:f.nota.value.trim()};
+  const otra=datos.find(d=>d.id!==editId&&d.patente===v.patente&&faltan(d)>0);
+  if(otra&&!confirm(`La patente ${v.patente} ya tiene una carga pendiente. ¿Crear otra igual?`))return;
   $('#dlg').close();
   hacer('Guardando…',async()=>{if(editId)await api('patentes?id=eq.'+editId,{method:'PATCH',body:v});
-    else{const [n]=await api('patentes',{method:'POST',body:v,prefer:'return=representation'});datos.push({...n,remitos:[]});location.hash='#/p/'+n.id}})};
-window.borrarPatente=id=>{const d=byId(id);if(!confirm(`¿Borrar la patente ${d.patente} con todos sus remitos y archivos?`))return;
+    else{const [n]=await api('patentes',{method:'POST',body:v,prefer:'return=representation'});datos.push({...n,remitos:[]});location.hash='#/p/'+n.id}},
+    editId?'Patente actualizada ✔':'Patente creada ✔')};
+window.borrarPatente=id=>{const d=byId(id);if(!confirm(`¿Borrar la patente ${d.patente} con todos sus remitos y archivos? No se puede deshacer.`))return;
   hacer('Borrando…',async()=>{await borrarArchivosStorage(archivos.filter(a=>a.patente_id===id).map(a=>a.ruta));
-    await api('patentes?id=eq.'+id,{method:'DELETE'});location.hash=''})};
+    await api('patentes?id=eq.'+id,{method:'DELETE'});location.hash=''},'Patente borrada')};
 
 // ---------- Remitos y archivos ----------
 let remPat=null, remId=null, nuevos=[];
@@ -230,11 +430,12 @@ window.abrirRemito=(pid,rid)=>{
   const r=rid&&byId(pid).remitos.find(x=>x.id===rid);
   if(r)['numero','instruccion','mercaderia'].forEach(k=>f[k].value=r[k]??'');
   $('#rTit').textContent=(r?'Remito N° '+r.numero:'Nuevo remito')+' · '+byId(pid).patente;
-  pintarArchivosDialogo();$('#dlgR').showModal();
+  $('#btnGuardarOtro').hidden=!!r;
+  pintarArchivosDialogo();$('#dlgR').showModal();if(!r)$('#rNumero').focus();
 };
 function pintarArchivosDialogo(){
   $('#rExistentes').innerHTML=remId?archivosDe(remId).map(a=>miniatura(a,true)).join(''):'';
-  $('#rNuevos').innerHTML=nuevos.map((f,i)=>`<div><span>🆕 ${esc(f.name)} (${kb(f.size)})</span><button type="button" class="sec mini" onclick="quitarNuevo(${i})">✕</button></div>`).join('');
+  $('#rNuevos').innerHTML=nuevos.map((f,i)=>`<div>${I('check')}<span>${esc(f.name)} (${kb(f.size)})</span><button type="button" aria-label="Quitar" onclick="quitarNuevo(${i})">${I('x')}</button></div>`).join('');
   const sinBase=!hayTablaArchivos;$('#btnFoto').disabled=sinBase;$('#btnArchivo').disabled=sinBase;
 }
 window.quitarNuevo=i=>{nuevos.splice(i,1);pintarArchivosDialogo()};
@@ -243,12 +444,12 @@ $('#btnArchivo').onclick=()=>$('#inArchivo').click();
 for(const s of ['#inFoto','#inArchivo'])$(s).onchange=e=>{nuevos.push(...e.target.files);e.target.value='';pintarArchivosDialogo()};
 window.quitarArchivo=id=>{const a=archivos.find(x=>x.id===id);if(!confirm(`¿Quitar ${a.nombre}?`))return;
   ocupado('Quitando…');
-  (async()=>{try{await borrarArchivosStorage([a.ruta]);await api('archivos?id=eq.'+id,{method:'DELETE'});archivos=archivos.filter(x=>x.id!==id)}
+  (async()=>{try{await borrarArchivosStorage([a.ruta]);await api('archivos?id=eq.'+id,{method:'DELETE'});archivos=archivos.filter(x=>x.id!==id);toast('Archivo quitado')}
     catch(e){alert('No se pudo quitar: '+e.message)}ocupado(false);pintarArchivosDialogo();render()})();
 };
 window.borrarRemito=rid=>{const d=datos.find(p=>p.remitos.some(r=>r.id===rid)),r=d.remitos.find(x=>x.id===rid);
   if(!confirm(`¿Quitar el remito N° ${r.numero} y sus archivos?`))return;
-  hacer('Quitando…',async()=>{await borrarArchivosStorage(archivosDe(rid).map(a=>a.ruta));await api('remitos?id=eq.'+rid,{method:'DELETE'})})};
+  hacer('Quitando…',async()=>{await borrarArchivosStorage(archivosDe(rid).map(a=>a.ruta));await api('remitos?id=eq.'+rid,{method:'DELETE'})},'Remito quitado')};
 
 // Achica las fotos (máx. 2000 px, JPG) para que suban rápido con datos móviles.
 async function prepararArchivo(file){
@@ -264,13 +465,13 @@ async function prepararArchivo(file){
   return {blob:file,nombre:file.name};
 }
 const extension=n=>{const m=/\.([a-z0-9]{1,8})$/i.exec(n);return m?m[1].toLowerCase():'bin'};
-$('#frmR').onsubmit=e=>{e.preventDefault();const f=$('#frmR');
+$('#frmR').onsubmit=async e=>{e.preventDefault();const f=$('#frmR');const otro=e.submitter&&e.submitter.value==='otro';
   const v={numero:f.numero.value.trim(),instruccion:f.instruccion.value.trim(),mercaderia:f.mercaderia.value.trim()};
   const pid=remPat,lista=[...nuevos];let rid=remId;
   const repetido=byId(pid).remitos.find(r=>r.id!==rid&&r.numero.toLowerCase()===v.numero.toLowerCase());
   if(repetido&&!confirm(`Ya hay un remito N° ${v.numero} en esta patente. ¿Guardarlo igual?`))return;
   $('#dlgR').close();
-  hacer('Guardando remito…',async()=>{
+  const bien=await hacer('Guardando remito…',async()=>{
     if(rid)await api('remitos?id=eq.'+rid,{method:'PATCH',body:v});
     else rid=(await api('remitos',{method:'POST',body:{patente_id:pid,...v},prefer:'return=representation'}))[0].id;
     for(let i=0;i<lista.length;i++){
@@ -280,7 +481,11 @@ $('#frmR').onsubmit=e=>{e.preventDefault();const f=$('#frmR');
       await subirArchivo(ruta,blob);
       await api('archivos',{method:'POST',body:{remito_id:rid,patente_id:pid,nombre,tipo:blob.type||null,tamano:blob.size,ruta}});
     }
-  })};
+  },'Remito guardado ✔');
+  const d=byId(pid);
+  if(bien&&otro&&d&&faltan(d)>0)abrirRemito(pid,null);
+  else if(bien&&d&&!faltan(d)&&!remId)toast(`¡Patente ${d.patente} completa! 🎉`);
+};
 
 // ---------- Descargar una patente (ZIP con resumen + todos los archivos) ----------
 const limpio=s=>String(s).replace(/[\\/:*?"<>|\u0000-\u001f]+/g,'-').trim()||'archivo';
@@ -318,11 +523,17 @@ window.descargarPatente=id=>{const d=byId(id);
     const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`${limpio(d.patente)}_${hoy}.zip`;
     document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},60000);
     if(fallas.length)alert(`Ojo: ${fallas.length} archivo(s) no se pudieron bajar. Están anotados en resumen.txt.`);
-  });
+  },'Descarga lista ✔ (mirá en Descargas)');
 };
 
 document.querySelectorAll('[data-cerrar]').forEach(b=>b.onclick=()=>b.closest('dialog').close());
-$('#btnRecargar').onclick=recargar;
+$('#btnRecargar').onclick=async()=>{ocupado('Actualizando…');await recargar();ocupado(false);toast('Actualizado ✔')};
+
+// ---------- Instalar la app ----------
+let pedidoInstalar=null;
+window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();pedidoInstalar=e;$('#filaInstalar').hidden=false});
+window.addEventListener('appinstalled',()=>{$('#filaInstalar').hidden=true;toast('App instalada ✔')});
+$('#btnInstalar').onclick=async()=>{if(!pedidoInstalar)return;pedidoInstalar.prompt();pedidoInstalar=null;$('#filaInstalar').hidden=true};
 
 // ---------- Notificaciones ----------
 function b64ToBytes(b){const p='='.repeat((4-b.length%4)%4),s=atob((b+p).replace(/-/g,'+').replace(/_/g,'/'));return Uint8Array.from(s,c=>c.charCodeAt(0))}
@@ -333,8 +544,8 @@ async function suscribirPush(){
     if(!sub)sub=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:b64ToBytes(C.VAPID_PUBLIC_KEY)});
     const j=sub.toJSON();
     await api('rpc/guardar_suscripcion',{method:'POST',body:{p_endpoint:j.endpoint,p_p256dh:j.keys.p256dh,p_auth:j.keys.auth,p_dispositivo:navigator.userAgent.slice(0,200)}});
-    estadoPush='Este dispositivo está registrado para recibir avisos ✔';
-  }catch(e){estadoPush='No se pudo registrar este dispositivo para avisos: '+e.message;console.log('push',e)}
+    estadoPush='Este dispositivo está registrado ✔';
+  }catch(e){estadoPush='No se pudo registrar este dispositivo: '+e.message;console.log('push',e)}
   render();
 }
 async function notificar(titulo,cuerpo){
@@ -344,7 +555,7 @@ async function notificar(titulo,cuerpo){
 }
 $('#btnNotif').onclick=async()=>{await Notification.requestPermission();await suscribirPush();render()};
 $('#btnProbar').onclick=async()=>{if(Notification.permission!=='granted'){await Notification.requestPermission();await suscribirPush()}render();
-  const p=datos.filter(d=>faltan(d)>0);notificar('Prueba de aviso',p.length?`Tenés ${p.length} patente(s) pendientes`:'Todo al día')};
+  const p=datos.filter(d=>faltan(d)>0);notificar('Prueba de aviso',p.length?`Tenés ${p.length} patente(s) con remitos pendientes`:'Todo al día')};
 
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')recargar()});
 setInterval(()=>{if(document.visibilityState==='visible'&&$('#ocupado').hidden&&!document.querySelector('dialog[open]'))recargar()},120000);
