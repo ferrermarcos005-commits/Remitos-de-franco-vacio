@@ -9,6 +9,11 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with: { node-version: 22 }
+      - name: Pagina publicada
+        run: |
+          for u in https://ferrermarcos005-commits.github.io/Remitos-de-franco-vacio/ https://ferrermarcos005-commits.github.io/remitos-de-franco-vacio/; do
+            code=$(curl -s -o /tmp/p.html -w '%{http_code}' "$u"); echo "PAGINA $u -> $code, version nueva: $(grep -c jszip /tmp/p.html || true)"
+          done
       - run: npm install --no-save playwright@1.63.0 && npx playwright install --with-deps chromium
       - run: (python3 -m http.server 8766 &) && sleep 1 && node scripts/prueba-real.mjs
         env:
