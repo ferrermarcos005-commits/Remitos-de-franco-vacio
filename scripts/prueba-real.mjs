@@ -4,7 +4,7 @@ import { chromium } from 'playwright';
 import { createRequire } from 'node:module';
 import fs from 'node:fs';
 const require = createRequire(import.meta.url);
-const JSZip = require('../jszip.min.js');
+fs.copyFileSync('jszip.min.js', '/tmp/jszip.cjs'); const JSZip = require('/tmp/jszip.cjs');
 const cfg = fs.readFileSync('config.js', 'utf8');
 const URL_ = cfg.match(/SUPABASE_URL:\s*'([^']+)'/)[1];
 const SEC = (process.env.SUPABASE_SECRET_KEY || '').trim();
@@ -43,7 +43,7 @@ try {
   const [dl] = await Promise.all([p.waitForEvent('download', { timeout: 30000 }), p.click('text=⬇ Descargar todo')]);
   const z = await JSZip.loadAsync(fs.readFileSync(await dl.path()));
   const names = Object.keys(z.files); ok('descargar ZIP de la patente', names.length === 5, names.join(', '));
-  const rutas = await p.evaluate(() => archivos.map(a => a.ruta));
+  const rutas = await p.evaluate(() => { const id = location.hash.split('/').pop(); return archivos.filter(a => a.patente_id === id).map(a => a.ruta); });
   await p.click('#cabPatente >> text=Borrar'); await p.waitForSelector('#ocupado', { state: 'hidden', timeout: 30000 }); await p.waitForTimeout(1000);
   const sigue = await p.evaluate(pat => datos.some(d => d.patente === pat), PAT);
   ok('borrar patente de prueba', !sigue);
