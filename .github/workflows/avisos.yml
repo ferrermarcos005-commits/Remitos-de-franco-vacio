@@ -3,19 +3,26 @@ on:
   schedule:
     # Cada hora (en el minuto 7) de 8 a 18 hora Argentina (UTC-3) = 11 a 21 UTC, lunes a viernes.
     # No se usa el minuto 0 porque GitHub recomienda evitarlo: a esa hora hay más demoras y a veces descarta corridas.
-    # GitHub puede demorar unos minutos en arrancar.
     - cron: '7 11-21 * * 1-5'
-  workflow_dispatch: {}
+  # También se puede correr a mano (Actions → Avisos de remitos → Run workflow) o desde Supabase (respaldo del horario).
+  workflow_dispatch:
+    inputs:
+      origen:
+        description: 'Quién lo dispara (manual o supabase)'
+        required: false
+        default: manual
+        type: string
 jobs:
   avisar:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
-        with: { node-version: 20 }
+        with: { node-version: 22 }
       - run: npm install --omit=dev
       - run: node scripts/enviar-avisos.mjs
         env:
+          ORIGEN: ${{ github.event_name == 'schedule' && 'github' || inputs.origen }}
           SUPABASE_URL: https://nnvjngqtlblryqkhoeyj.supabase.co
           SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
           VAPID_PUBLIC_KEY: BNi0dVQu9nh0kzMrBeRCJft9OMrGbg8yf-sEfDPx2buXAOGAnMYKbCOviACpD8ZBp0bx04R_422scf2sx8svlvM
