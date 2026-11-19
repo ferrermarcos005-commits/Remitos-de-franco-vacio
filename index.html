@@ -149,7 +149,7 @@ async function recargar(){
 async function hacer(msg,fn){
   ocupado(msg);
   try{await fn()}catch(e){alert('No se pudo completar: '+e.message);console.log(e)}
-  ocupado(false);await recargar();
+  ocupado('Actualizando…');await recargar();ocupado(false);
 }
 function ocupado(msg){$('#ocupado').hidden=!msg;if(msg)$('#ocupadoTxt').textContent=msg}
 
@@ -218,7 +218,7 @@ $('#frm').onsubmit=e=>{e.preventDefault();const f=$('#frm');
   const v={patente:f.patente.value.trim().toUpperCase(),tipo:f.tipo.value,esperados:+f.esperados.value,nota:f.nota.value.trim()};
   $('#dlg').close();
   hacer('Guardando…',async()=>{if(editId)await api('patentes?id=eq.'+editId,{method:'PATCH',body:v});
-    else{const [n]=await api('patentes',{method:'POST',body:v,prefer:'return=representation'});location.hash='#/p/'+n.id}})};
+    else{const [n]=await api('patentes',{method:'POST',body:v,prefer:'return=representation'});datos.push({...n,remitos:[]});location.hash='#/p/'+n.id}})};
 window.borrarPatente=id=>{const d=byId(id);if(!confirm(`¿Borrar la patente ${d.patente} con todos sus remitos y archivos?`))return;
   hacer('Borrando…',async()=>{await borrarArchivosStorage(archivos.filter(a=>a.patente_id===id).map(a=>a.ruta));
     await api('patentes?id=eq.'+id,{method:'DELETE'});location.hash=''})};
