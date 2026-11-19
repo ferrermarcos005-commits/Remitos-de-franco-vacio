@@ -1,9 +1,10 @@
 name: Avisos de remitos
 on:
   schedule:
-    # Cada hora en punto de 8 a 18 hora Argentina (UTC-3) = 11 a 21 UTC, lunes a viernes.
+    # Cada hora (en el minuto 7) de 8 a 18 hora Argentina (UTC-3) = 11 a 21 UTC, lunes a viernes.
+    # No se usa el minuto 0 porque GitHub recomienda evitarlo: a esa hora hay más demoras y a veces descarta corridas.
     # GitHub puede demorar unos minutos en arrancar.
-    - cron: '0 11-21 * * 1-5'
+    - cron: '7 11-21 * * 1-5'
   workflow_dispatch: {}
 jobs:
   avisar:
