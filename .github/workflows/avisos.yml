@@ -1,0 +1,21 @@
+name: Avisos de remitos
+on:
+  schedule:
+    # Cada hora en punto de 8 a 18 hora Argentina (UTC-3) = 11 a 21 UTC, lunes a viernes.
+    # GitHub puede demorar unos minutos en arrancar.
+    - cron: '0 11-21 * * 1-5'
+  workflow_dispatch: {}
+jobs:
+  avisar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20 }
+      - run: npm install --omit=dev
+      - run: node scripts/enviar-avisos.mjs
+        env:
+          SUPABASE_URL: https://nnvjngqtlblryqkhoeyj.supabase.co
+          SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
+          VAPID_PUBLIC_KEY: BNi0dVQu9nh0kzMrBeRCJft9OMrGbg8yf-sEfDPx2buXAOGAnMYKbCOviACpD8ZBp0bx04R_422scf2sx8svlvM
+          VAPID_PRIVATE_KEY: ${{ secrets.VAPID_PRIVATE_KEY }}

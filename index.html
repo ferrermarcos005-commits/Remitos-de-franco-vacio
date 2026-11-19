@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Remitos Franco</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon.svg">
+<script src="config.js"></script>
+<meta name="theme-color" content="#1f6feb">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<style>
+  :root{--bg:#f4f6f9;--card:#fff;--txt:#1b1f24;--sub:#5b6470;--pri:#1f6feb;--warn:#d1242f;--ok:#1a7f37;--line:#d8dee4}
+  @media (prefers-color-scheme:dark){:root{--bg:#0d1117;--card:#161b22;--txt:#e6edf3;--sub:#9198a1;--line:#30363d}}
+  *{box-sizing:border-box} body{margin:0;font:16px system-ui,sans-serif;background:var(--bg);color:var(--txt)}
+  header{background:var(--pri);color:#fff;padding:14px 16px;position:sticky;top:0;z-index:2}
+  header h1{margin:0;font-size:20px} header p{margin:4px 0 0;font-size:14px;opacity:.9}
+  main{padding:12px 16px 90px;max-width:640px;margin:auto}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:10px}
+  .pend{border-left:6px solid var(--warn)} .done{border-left:6px solid var(--ok);opacity:.75}
+  .row{display:flex;justify-content:space-between;align-items:center;gap:8px}
+  .pat{font-size:20px;font-weight:700;letter-spacing:1px} .tag{font-size:12px;padding:2px 8px;border-radius:99px;background:var(--line)}
+  .big{font-size:18px;font-weight:600} .sub{color:var(--sub);font-size:14px}
+  button{font:inherit;border:0;border-radius:10px;padding:10px 14px;background:var(--pri);color:#fff;cursor:pointer}
+  button.sec{background:var(--line);color:var(--txt)} button.ok{background:var(--ok)}
+  .rem{border-top:1px solid var(--line);padding:8px 0;font-size:15px} .rem b{font-size:16px}
+  .acts{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+  input,select,textarea{font:inherit;width:100%;padding:10px;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--txt);margin:4px 0 10px}
+  label{font-size:14px;color:var(--sub)} .row input{min-width:0;flex:1} h2{font-size:16px;margin:18px 0 8px}
+  .fab{position:fixed;right:16px;bottom:16px;font-size:18px;padding:14px 20px;border-radius:99px;box-shadow:0 4px 12px #0004}
+  dialog{border:0;border-radius:14px;padding:16px;width:min(94vw,480px);background:var(--card);color:var(--txt)}
+  .banner{background:#fff3cd;color:#664d03;padding:10px;border-radius:10px;margin-bottom:10px;font-size:14px}
+</style>
+</head>
+<body>
+<header><h1>Remitos por patente</h1><p id="resumen"></p></header>
+<main>
+  <div id="avisoNotif" class="banner" hidden>Activá las notificaciones para que te recuerde los pendientes. <button id="btnNotif">Activar</button></div>
+  <div id="error" class="banner" hidden></div>
+  <h2>Pendientes</h2><div id="listaPend"></div>
+  <h2>Completos</h2><div id="listaDone"></div>
+  <h2>Avisos</h2>
+  <div class="card"><div class="sub" id="estadoAvisos"></div>
+    <div class="acts"><button class="sec" id="btnProbar">Probar notificación</button><button class="sec" id="btnRecargar">Actualizar</button></div></div>
+</main>
+<button class="fab" id="btnNuevo">+ Patente</button>
+
+<dialog id="dlg"><form method="dialog" id="frm">
+  <h2 id="dlgTit">Nueva patente</h2>
+  <label>Patente</label><input name="patente" required placeholder="AB123CD" style="text-transform:uppercase">
+  <label>Tipo</label><select name="tipo"><option>Camión/Semi</option><option>Balancín</option></select>
+  <label>Remitos que tendrían que venir</label><input name="esperados" type="number" min="0" required>
+  <label>Nota (ej: faltan clientes, termina mañana)</label><textarea name="nota" rows="2"></textarea>
+  <div class="acts"><button value="ok">Guardar</button><button class="sec" value="cancel" formnovalidate>Cancelar</button></div>
+</form></dialog>
+<dialog id="dlgR"><form method="dialog" id="frmR">
+  <h2>Remito de <span id="rPat"></span></h2>
+  <label>Número de remito</label><input name="numero" required inputmode="numeric">
+  <label>Instrucción</label><textarea name="instruccion" rows="2"></textarea>
+  <label>Mercadería llevada</label><textarea name="mercaderia" rows="2"></textarea>
+  <div class="acts"><button value="ok">Guardar remito</button><button class="sec" value="cancel" formnovalidate>Cancelar</button></div>
+</form></dialog>
+
+<script>
+const C=window.CONFIG||{}, ONLINE=!!(C.SUPABASE_URL&&C.SUPABASE_ANON_KEY);
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const fecha=t=>new Date(t).toLocaleString('es-AR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
+const dias=t=>{const n=Math.floor((Date.now()-new Date(t))/864e5);return n<=0?'hoy':n===1?'ayer':`hace ${n} días`};
+const hechos=d=>d.remitos.length, faltan=d=>Math.max(0,d.esperados-hechos(d));
+let datos=[], editId=null, remPat=null, reg=null;
+
+// ---------- Capa de datos: Supabase (REST) o, si no está configurado, el celu ----------
+async function api(path,{method='GET',body,prefer}={}){
+  const h={apikey:C.SUPABASE_ANON_KEY,'Content-Type':'application/json'}; // las claves nuevas sb_ van solo en apikey
+  if(prefer)h.Prefer=prefer;
+  const r=await fetch(`${C.SUPABASE_URL}/rest/v1/${path}`,{method,headers:h,body:body&&JSON.stringify(body)});
+  if(!r.ok)throw new Error(`${r.status} ${await r.text()}`);
+  return r.status===204?null:r.json().catch(()=>null);
+}
+const LKEY='remitos-datos-v3';
+const local={get:()=>{try{return JSON.parse(localStorage.getItem(LKEY))||[]}catch{return[]}},set:v=>{try{localStorage.setItem(LKEY,JSON.stringify(v))}catch{}}};
+const uid=()=>crypto.randomUUID?crypto.randomUUID():Date.now().toString(36)+Math.random().toString(36).slice(2);
+const db={
+  async listar(){ if(!ONLINE)return local.get();
+    return api('patentes?select=*,remitos(*)&order=creado.asc&remitos.order=creado.asc'); },
+  async crearPatente(v){ if(!ONLINE){const l=local.get();l.push({id:uid(),creado:new Date().toISOString(),remitos:[],...v});return local.set(l)}
+    await api('patentes',{method:'POST',body:v}); },
+  async editarPatente(id,v){ if(!ONLINE){const l=local.get();Object.assign(l.find(x=>x.id===id),v);return local.set(l)}
+    await api('patentes?id=eq.'+id,{method:'PATCH',body:v}); },
+  async borrarPatente(id){ if(!ONLINE)return local.set(local.get().filter(x=>x.id!==id));
+    await api('patentes?id=eq.'+id,{method:'DELETE'}); },
+  async crearRemito(pid,v){ if(!ONLINE){const l=local.get();l.find(x=>x.id===pid).remitos.push({id:uid(),creado:new Date().toISOString(),...v});return local.set(l)}
+    await api('remitos',{method:'POST',body:{patente_id:pid,...v}}); },
+  async borrarRemito(pid,rid){ if(!ONLINE){const l=local.get();const d=l.find(x=>x.id===pid);d.remitos=d.remitos.filter(r=>r.id!==rid);return local.set(l)}
+    await api('remitos?id=eq.'+rid,{method:'DELETE'}); },
+};
+async function recargar(){
+  try{datos=await db.listar();$('#error').hidden=true}catch(e){$('#error').hidden=false;$('#error').textContent='No pude conectar con el servidor. Revisá la señal y tocá Actualizar.';console.log(e);render();$('#resumen').textContent='Sin conexión con el servidor';return}
+  render();
+}
+async function hacer(fn){try{await fn()}catch(e){alert('No se pudo guardar: '+e.message)}await recargar()}
+
+// ---------- Pantalla ----------
+function render(){
+  const pend=datos.filter(d=>faltan(d)>0), done=datos.filter(d=>faltan(d)===0);
+  $('#resumen').textContent=pend.length?`${pend.length} patente(s) con remitos pendientes`:'Todo al día 👌';
+  const card=d=>`<div class="card ${faltan(d)?'pend':'done'}">
+    <div class="row"><span class="pat">${esc(d.patente)}</span><span class="tag">${esc(d.tipo)}</span></div>
+    <div class="big">${hechos(d)} de ${d.esperados} remitos ${faltan(d)?`· faltan ${faltan(d)}`:'✔'}</div>
+    <div class="sub">Cargada ${dias(d.creado)}${d.nota?' · '+esc(d.nota):''}</div>
+    <details><summary class="sub">Ver remitos (${hechos(d)})</summary>
+      ${d.remitos.map(r=>`<div class="rem"><b>N° ${esc(r.numero)}</b>${r.instruccion?`<div>Instrucción: ${esc(r.instruccion)}</div>`:''}${r.mercaderia?`<div>Mercadería: ${esc(r.mercaderia)}</div>`:''}
+        <div class="sub">${fecha(r.creado)} · <a href="#" onclick="borrarRem('${d.id}','${r.id}');return false">quitar</a></div></div>`).join('')||'<p class="sub">Sin remitos cargados.</p>'}
+    </details>
+    <div class="acts">${faltan(d)?`<button class="ok" onclick="nuevoRem('${d.id}')">+ Remito</button>`:''}
+      <button class="sec" onclick="editar('${d.id}')">Editar</button><button class="sec" onclick="borrar('${d.id}')">Borrar</button></div></div>`;
+  $('#listaPend').innerHTML=pend.map(card).join('')||'<p class="sub">No hay pendientes.</p>';
+  $('#listaDone').innerHTML=done.map(card).join('')||'<p class="sub">Nada todavía.</p>';
+  const perm='Notification' in window?Notification.permission:'no';
+  $('#avisoNotif').hidden=perm==='granted'||perm==='no';
+  $('#estadoAvisos').textContent=(ONLINE?'Datos compartidos en el servidor. ':'Modo prueba: los datos quedan solo en este celu. ')+
+    'Avisos cada 1 hora, de lunes a viernes de 8 a 18, mientras haya pendientes. '+(perm==='granted'?'Notificaciones activadas ✔':'Notificaciones sin activar.');
+  if(navigator.setAppBadge){pend.length?navigator.setAppBadge(pend.length).catch(()=>{}):navigator.clearAppBadge().catch(()=>{})}
+}
+const byId=id=>datos.find(x=>x.id===id);
+window.nuevoRem=id=>{remPat=id;$('#frmR').reset();$('#rPat').textContent=byId(id).patente;$('#dlgR').showModal()};
+window.borrarRem=(id,rid)=>{if(confirm('¿Quitar este remito?'))hacer(()=>db.borrarRemito(id,rid))};
+window.borrar=id=>{if(confirm('¿Borrar esta patente y sus remitos?'))hacer(()=>db.borrarPatente(id))};
+window.editar=id=>{const d=byId(id);editId=id;const f=$('#frm');
+  ['patente','tipo','esperados','nota'].forEach(k=>f[k].value=d[k]??'');$('#dlgTit').textContent='Editar patente';$('#dlg').showModal()};
+$('#btnNuevo').onclick=()=>{editId=null;$('#frm').reset();$('#dlgTit').textContent='Nueva patente';$('#dlg').showModal()};
+$('#dlg').addEventListener('close',()=>{if($('#dlg').returnValue!=='ok')return;const f=$('#frm');
+  const v={patente:f.patente.value.trim().toUpperCase(),tipo:f.tipo.value,esperados:+f.esperados.value,nota:f.nota.value.trim()};
+  hacer(()=>editId?db.editarPatente(editId,v):db.crearPatente(v))});
+$('#dlgR').addEventListener('close',()=>{if($('#dlgR').returnValue!=='ok')return;const f=$('#frmR');
+  const v={numero:f.numero.value.trim(),instruccion:f.instruccion.value.trim(),mercaderia:f.mercaderia.value.trim()};
+  hacer(()=>db.crearRemito(remPat,v))});
+$('#btnRecargar').onclick=recargar;
+
+// ---------- Notificaciones ----------
+function b64ToBytes(b){const p='='.repeat((4-b.length%4)%4),s=atob((b+p).replace(/-/g,'+').replace(/_/g,'/'));return Uint8Array.from(s,c=>c.charCodeAt(0))}
+async function suscribirPush(){
+  // Avisos con la app cerrada: guarda la suscripción en Supabase; GitHub los manda cada hora.
+  if(!ONLINE||!reg||!('PushManager' in window)||Notification.permission!=='granted')return;
+  try{let sub=await reg.pushManager.getSubscription();
+    if(!sub)sub=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:b64ToBytes(C.VAPID_PUBLIC_KEY)});
+    const j=sub.toJSON();
+    await api('push_subs?on_conflict=endpoint',{method:'POST',prefer:'resolution=merge-duplicates',body:{endpoint:j.endpoint,p256dh:j.keys.p256dh,auth:j.keys.auth,dispositivo:navigator.userAgent.slice(0,200)}});
+  }catch(e){console.log('push',e)}
+}
+async function notificar(titulo,cuerpo){
+  if(!('Notification' in window)||Notification.permission!=='granted')return;
+  const opt={body:cuerpo,icon:'icon.svg',tag:'remitos',renotify:true,vibrate:[200,100,200]};
+  try{reg?await reg.showNotification(titulo,opt):new Notification(titulo,opt)}catch(e){console.log(e)}
+}
+function enHorario(){const n=new Date(),d=n.getDay(),h=n.getHours();return d>=1&&d<=5&&h>=8&&h<18}
+// Respaldo sin servidor: aviso cada hora mientras la app está abierta o en segundo plano.
+setInterval(()=>{if(ONLINE)return;const p=datos.filter(d=>faltan(d)>0);if(p.length&&enHorario())
+  notificar(`Che, te faltan remitos en ${p.length} patente(s)`,p.slice(0,4).map(d=>`${d.patente}: faltan ${faltan(d)}`).join(' · '))},3600000);
+$('#btnNotif').onclick=async()=>{await Notification.requestPermission();await suscribirPush();render()};
+$('#btnProbar').onclick=async()=>{if(Notification.permission!=='granted'){await Notification.requestPermission();await suscribirPush()}render();
+  const p=datos.filter(d=>faltan(d)>0);notificar('Prueba de aviso',p.length?`Tenés ${p.length} patente(s) pendientes`:'Todo al día')};
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')recargar()});
+if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').then(r=>{reg=r;return navigator.serviceWorker.ready}).then(r=>{reg=r;suscribirPush()}).catch(()=>{});
+recargar();
+</script>
+</body>
+</html>
