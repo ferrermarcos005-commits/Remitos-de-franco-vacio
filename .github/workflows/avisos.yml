@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
     inputs:
       origen:
-        description: 'Quién lo dispara (manual o supabase)'
+        description: 'Quién lo dispara (manual, supabase o supabase-prueba)'
         required: false
         default: manual
         type: string

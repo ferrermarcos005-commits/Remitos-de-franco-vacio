@@ -3,7 +3,8 @@
 import webpush from 'web-push';
 const env = k => (process.env[k] || '').trim();
 const SUPABASE_URL = env('SUPABASE_URL'), KEY = env('SUPABASE_SECRET_KEY');
-const ORIGEN = env('ORIGEN') || 'github';           // 'manual' = alguien lo corrió a mano desde Actions
+const ORIGEN = env('ORIGEN') || 'github';           // github / supabase = horario automático; manual o *-prueba = a mano
+const AUTOMATICO = ['github', 'supabase'].includes(ORIGEN);
 if (!KEY.startsWith('sb_secret_') || KEY.length < 20)
   throw new Error(`La clave SUPABASE_SECRET_KEY parece incompleta (tiene ${KEY.length} caracteres). Copiala entera desde Supabase → Project Settings → API Keys.`);
 const h = { apikey: KEY, Authorization: `Bearer ${KEY}` };
@@ -11,9 +12,9 @@ const get = async p => { const r = await fetch(`${SUPABASE_URL}/rest/v1/${p}`, {
 
 // Si ya salió un aviso automático hace menos de 40 minutos (por ejemplo, lo disparó el otro horario), no se repite.
 let hayLog = true;
-if (ORIGEN !== 'manual') {
+if (AUTOMATICO) {
   try {
-    const [ult] = await get('avisos_log?select=enviado,origen&order=enviado.desc&limit=1');
+    const [ult] = await get('avisos_log?select=enviado,origen&origen=in.(github,supabase)&order=enviado.desc&limit=1');
     if (ult && Date.now() - Date.parse(ult.enviado) < 40 * 60e3) { console.log(`Ya se mandó un aviso a las ${ult.enviado} (${ult.origen}). No se repite.`); process.exit(0); }
   } catch (e) { hayLog = false; console.log('Sin registro de avisos (tabla avisos_log):', e.message.slice(0, 80)); }
 }
